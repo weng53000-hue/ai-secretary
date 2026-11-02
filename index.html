@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 秘書接收端</title>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; text-align: center; padding: 40px 20px; background: #f4f7f6; color: #333; }
+        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); max-width: 400px; margin: 0 auto; }
+        button { padding: 15px 30px; font-size: 18px; background: #28a745; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 20px; }
+        button:active { background: #218838; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>AI 秘書通知綁定</h1>
+        <p>請點擊下方按鈕允許通知，並透過手機瀏覽器將此網頁「加到主畫面」以完成安裝。</p>
+        <button onclick="requestPermission()">🔔 啟用秘書通知</button>
+    </div>
+
+    <script>
+        const GAS_URL = 'https://script.google.com/macros/s/AKfycbyJUB0Mqu129QpJn9BnYRxwOSFLHFBYMVDKEQOgE5wX-arrViWvgNqcY7ic84HMrwGo/exec';
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+            .then(reg => console.log('Service Worker 註冊成功'))
+            .catch(err => console.error('註冊失敗:', err));
+        }
+
+        function requestPermission() {
+            Notification.requestPermission().then(permission => {
+                if (permission === 'granted') {
+                    // 試跑版：將這個網頁的網址模擬為接收端，發送給 GAS 記錄
+                    // 正式 Web Push 需交換憑證，試跑期我們先用簡單的相對通知
+                    fetch(GAS_URL + '?set_endpoint=' + encodeURIComponent(window.location.href), { method: 'POST', mode: 'no-cors' });
+                    alert('🎉 通知權限已開啟！測試管道已建立，請點瀏覽器選單將此頁「加到主畫面」喔。');
+                } else {
+                    alert('必須允許通知，AI 秘書才能在時間到時提醒你喔！');
+                }
+            });
+        }
+    </script>
+</body>
+</html>
